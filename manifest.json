@@ -1,10 +1,12 @@
 {
   "name": "Player Douglas Almondes",
-  "short_name": "Player",
-  "start_url": ".",
+  "short_name": "Player DA",
+  "description": "Player de música offline com autoplay, shuffle e repeat.",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0b0b0b",
   "theme_color": "#1db954",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icons/icon-192.png",
