@@ -1,12 +1,23 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Player Douglas Almondes</title>
-<link id="pwamanifestlink" rel="manifest" href="#">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Player Douglas Almondes</title>
 
-<style>
+  <!-- Link para o manifest PWA -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Registro do Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+      .then(() => console.log('Service Worker registrado.'))
+      .catch(err => console.error('Falha ao registrar SW:', err));
+    }
+  </script>
+
+  <style>
 :root{
   --bg:#0b0b0b; --panel:#121212; --muted:#bdbdbd; --accent:#1db954; --accent-2:#14a746;
 }
