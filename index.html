@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Player Douglas Almondes</title>
 
 <!-- Manifest PWA -->
@@ -12,209 +12,159 @@
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js')
-    .then(() => console.log('Service Worker registrado.'))
-    .catch(err => console.error('Falha ao registrar SW:', err));
+    .then(()=>console.log('Service Worker registrado.'))
+    .catch(err=>console.error('Falha ao registrar SW:', err));
 }
 </script>
 
-<!-- Overlay inicial para habilitar autoplay em dispositivos que exigem interação -->
+<!-- Overlay inicial para permitir autoplay em mobile -->
 <div id="startOverlay" style="position:fixed;inset:0;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:9999">
-  Clique para iniciar o player
+Clique para iniciar o player
 </div>
 
-<!-- CSS do player -->
 <style>
-:root{
-  --bg:#0b0b0b; --panel:#121212; --muted:#bdbdbd; --accent:#1db954;
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
-  background:linear-gradient(180deg,var(--bg),#070707 70%); color:#fff;
-  display:flex; justify-content:center; padding:16px;
-}
-.app{
-  width:100%; max-width:980px; display:grid;
-  grid-template-columns: 395px 1fr; gap:14px;
-  align-items:start;
-  margin-bottom:28px;
-}
-@media (max-width:980px){ .app{ grid-template-columns:320px 1fr; gap:12px; } }
-@media (max-width:860px){ .app{ grid-template-columns:1fr; } }
-.panel{
-  background:linear-gradient(180deg,var(--panel),#0f0f0f);
-  border-radius:14px; padding:16px; box-shadow:0 8px 30px rgba(0,0,0,0.6);
-}
-.cover{
-  width:100%; border-radius:12px; height:395px; background:#0f0f0f;
-  display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;
-}
-.cover img{ width:100%; height:100%; object-fit:cover; display:block; }
-.visual-canvas{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; flex-wrap:wrap; padding:8px }
-.track-info{ padding:12px 6px 0; text-align:center }
-.title{ font-size:18px; font-weight:700; margin:6px 0 4px; color:#fff; word-break:break-word; }
-.artist{ font-size:13px; color:var(--muted); margin-bottom:8px; }
-.progress-row{ display:flex; align-items:center; gap:8px; margin-top:10px }
-.time{ font-size:12px; color:var(--muted); width:44px; text-align:center; white-space:nowrap; }
-.progress{
-  -webkit-appearance:none; appearance:none; height:8px; border-radius:999px;
-  background:#222; flex:1; outline:none;
-}
-.progress::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:14px; height:14px; border-radius:50%; background:var(--accent); box-shadow:0 0 6px rgba(29,185,84,0.25) }
-.controls { display:flex; justify-content:center; gap:16px; margin-top:14px; align-items:center; flex-wrap:wrap }
-.ctrl-btn{ background:none; border:none; color:var(--accent); font-size:22px; width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,0.6) }
-.ctrl-btn.secondary{ background:#0f0f0f; color:var(--muted); width:44px; height:44px; font-size:18px; border-radius:12px; }
-.ctrl-btn:active{ transform:scale(.96) }
-.sleep{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:14px; padding-top:12px; border-top:1px solid #111; flex-wrap:wrap; }
-.sleep .countdown{ background:#0d0d0d; padding:8px 12px; border-radius:10px; color:var(--muted) }
-.playlist-panel{ background:linear-gradient(180deg,#0f0f0f,#0b0b0b); border-radius:14px; padding:12px; height:calc(100vh - 72px); overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.6) }
-.list{ overflow:auto; height:calc(100% - 64px); padding-right:6px }
-.track-item{ padding:10px; border-radius:10px; display:flex; gap:12px; align-items:center; cursor:pointer; background:transparent; transition:all .12s; border:1px solid transparent; }
-.track-item:hover{ background:#111 }
-.track-item.active{ background:linear-gradient(90deg, rgba(29,185,84,.12), transparent); border-color:rgba(29,185,84,.14) }
-.track-meta{ flex:1; min-width:0 }
-.track-title{ font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.track-sub{ font-size:12px; color:var(--muted) }
-.track-thumb{ width:44px; height:44px; border-radius:8px; background:#0b0b0b; flex:0 0 44px; overflow:hidden; display:flex; align-items:center; justify-content:center }
-.track-thumb img{ width:100%; height:100%; object-fit:cover; display:block }
+:root{--bg:#0b0b0b;--panel:#121212;--muted:#bdbdbd;--accent:#1db954;}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;background:linear-gradient(180deg,var(--bg),#070707 70%);color:#fff;display:flex;justify-content:center;padding:16px}
+.app{width:100%;max-width:980px;display:grid;grid-template-columns:395px 1fr;gap:14px;align-items:start;margin-bottom:28px}
+@media(max-width:980px){.app{grid-template-columns:320px 1fr;gap:12px}}@media(max-width:860px){.app{grid-template-columns:1fr}}
+.panel{background:linear-gradient(180deg,var(--panel),#0f0f0f);border-radius:14px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+.cover{width:100%;border-radius:12px;height:395px;background:#0f0f0f;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.visual-canvas{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;flex-wrap:wrap;padding:8px}
+.track-info{padding:12px 6px 0;text-align:center}
+.title{font-size:18px;font-weight:700;margin:6px 0 4px;color:#fff;word-break:break-word}
+.artist{font-size:13px;color:var(--muted);margin-bottom:8px}
+.progress-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+.time{font-size:12px;color:var(--muted);width:44px;text-align:center;white-space:nowrap}
+.progress{-webkit-appearance:none;appearance:none;height:8px;border-radius:999px;background:#222;flex:1;outline:none}
+.progress::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px rgba(29,185,84,0.25)}
+.controls{display:flex;justify-content:center;gap:16px;margin-top:14px;align-items:center;flex-wrap:wrap}
+.ctrl-btn{background:none;border:none;color:var(--accent);font-size:22px;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,0.6)}
+.ctrl-btn.secondary{background:#0f0f0f;color:var(--muted);width:44px;height:44px;font-size:18px;border-radius:12px}
+.ctrl-btn:active{transform:scale(.96)}
+.playlist-panel{background:linear-gradient(180deg,#0f0f0f,#0b0b0b);border-radius:14px;padding:12px;height:calc(100vh - 72px);overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+.list{overflow:auto;height:calc(100% - 64px);padding-right:6px}
+.track-item{padding:10px;border-radius:10px;display:flex;gap:12px;align-items:center;cursor:pointer;background:transparent;transition:all .12s;border:1px solid transparent}
+.track-item:hover{background:#111}
+.track-item.active{background:linear-gradient(90deg,rgba(29,185,84,.12),transparent);border-color:rgba(29,185,84,.14)}
 </style>
 </head>
 <body>
-
 <div class="app">
-  <!-- Player -->
-  <div class="panel">
-    <div class="cover"><img id="coverImg" src="" alt="Capa"><div class="visual-canvas" id="visualCanvas"></div></div>
-    <div class="track-info">
-      <div class="title" id="nowTitle">Nenhuma faixa</div>
-      <div class="artist" id="nowArtist">Selecione a pasta de músicas</div>
-      <div class="progress-row">
-        <div class="time" id="curTime">0:00</div>
-        <input id="progress" class="progress" type="range" min="0" max="100" value="0">
-        <div class="time" id="durTime">0:00</div>
-      </div>
-      <div class="controls">
-        <button class="ctrl-btn secondary" id="shuffleBtn">🔀</button>
-        <button class="ctrl-btn" id="prevBtn">⏮️</button>
-        <button class="ctrl-btn" id="playBtn">▶️</button>
-        <button class="ctrl-btn" id="nextBtn">⏭️</button>
-        <button class="ctrl-btn secondary" id="repeatBtn">🔁</button>
-      </div>
-    </div>
-  </div>
+<div class="panel">
+<div class="cover"><img id="coverImg" src="" alt="Capa"><div class="visual-canvas" id="visualCanvas"></div></div>
+<div class="track-info">
+<div class="title" id="nowTitle">Nenhuma faixa</div>
+<div class="artist" id="nowArtist">Selecione a pasta de músicas</div>
+<div class="progress-row">
+<div class="time" id="curTime">0:00</div>
+<input id="progress" class="progress" type="range" min="0" max="100" value="0">
+<div class="time" id="durTime">0:00</div>
+</div>
+<div class="controls">
+<button class="ctrl-btn secondary" id="shuffleBtn">🔀</button>
+<button class="ctrl-btn" id="prevBtn">⏮️</button>
+<button class="ctrl-btn" id="playBtn">▶️</button>
+<button class="ctrl-btn" id="nextBtn">⏭️</button>
+<button class="ctrl-btn secondary" id="repeatBtn">🔁</button>
+</div>
+</div>
+</div>
 
-  <!-- Playlist -->
-  <div class="playlist-panel panel">
-    <input id="fileInput" type="file" webkitdirectory multiple accept="audio/*">
-    <div class="list" id="list"></div>
-  </div>
+<div class="playlist-panel panel">
+<input id="fileInput" type="file" webkitdirectory multiple accept="audio/*">
+<div class="list" id="list"></div>
+</div>
 </div>
 
 <audio id="audio" crossorigin="anonymous"></audio>
-
 <script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.7/dist/jsmediatags.min.js"></script>
 
 <script>
-// ELEMENTOS
-const audio = document.getElementById('audio');
-const playBtn = document.getElementById('playBtn');
-const nextBtn = document.getElementById('nextBtn');
-const prevBtn = document.getElementById('prevBtn');
-const shuffleBtn = document.getElementById('shuffleBtn');
-const repeatBtn = document.getElementById('repeatBtn');
-const fileInput = document.getElementById('fileInput');
-const listEl = document.getElementById('list');
-const nowTitle = document.getElementById('nowTitle');
-const nowArtist = document.getElementById('nowArtist');
-const coverImg = document.getElementById('coverImg');
-const progress = document.getElementById('progress');
-const curTime = document.getElementById('curTime');
-const durTime = document.getElementById('durTime');
-const startOverlay = document.getElementById('startOverlay');
+const audio=document.getElementById('audio');
+const playBtn=document.getElementById('playBtn');
+const nextBtn=document.getElementById('nextBtn');
+const prevBtn=document.getElementById('prevBtn');
+const shuffleBtn=document.getElementById('shuffleBtn');
+const repeatBtn=document.getElementById('repeatBtn');
+const fileInput=document.getElementById('fileInput');
+const listEl=document.getElementById('list');
+const nowTitle=document.getElementById('nowTitle');
+const nowArtist=document.getElementById('nowArtist');
+const coverImg=document.getElementById('coverImg');
+const progress=document.getElementById('progress');
+const curTime=document.getElementById('curTime');
+const durTime=document.getElementById('durTime');
+const startOverlay=document.getElementById('startOverlay');
 
-let files = [];
-let order = [];
-let current = 0;
-let isPlaying = false;
-let isShuffle = false;
-let isRepeat = false;
+let files=[],order=[],current=0,isPlaying=false,isShuffle=false,isRepeat=false;
 
-// FUNÇÕES DE PLAY/PAUSE
-function play(){ audio.play().then(()=>{ isPlaying=true; playBtn.textContent='⏸️'; }).catch(()=>{}); }
-function pause(){ audio.pause(); isPlaying=false; playBtn.textContent='▶️'; }
+function play(){audio.play().then(()=>{isPlaying=true;playBtn.textContent='⏸️'}).catch(()=>{});}
+function pause(){audio.pause();isPlaying=false;playBtn.textContent='▶️';}
 
-// CONTROLES
-playBtn.addEventListener('click', ()=> audio.paused ? play() : pause());
-prevBtn.addEventListener('click', ()=> { current=(current-1+files.length)%files.length; loadTrackAt(current); play(); });
-nextBtn.addEventListener('click', ()=> { current=(current+1)%files.length; loadTrackAt(current); play(); });
-shuffleBtn.addEventListener('click', ()=>{ isShuffle=!isShuffle; shuffleBtn.style.background=isShuffle?'rgba(29,185,84,0.14)':'transparent'; });
-repeatBtn.addEventListener('click', ()=>{ isRepeat=!isRepeat; repeatBtn.style.background=isRepeat?'rgba(29,185,84,0.14)':'transparent'; });
+playBtn.addEventListener('click',()=>audio.paused?play():pause());
+prevBtn.addEventListener('click()=>{current=(current-1+files.length)%files.length;loadTrackAt(current);play();});
+nextBtn.addEventListener('click',()=>{current=(current+1)%files.length;loadTrackAt(current);play();});
+shuffleBtn.addEventListener('click',()=>{isShuffle=!isShuffle;shuffleBtn.style.background=isShuffle?'rgba(29,185,84,0.14)':'transparent';});
+repeatBtn.addEventListener('click',()=>{isRepeat=!isRepeat;repeatBtn.style.background=isRepeat?'rgba(29,185,84,0.14)':'transparent';});
 
-// SELEÇÃO DE ARQUIVOS
-fileInput.addEventListener('change', e=>{
-  files = Array.from(e.target.files).filter(f=>f.type.startsWith('audio/'));
-  if(!files.length) return;
-  order = files.map((_,i)=>i);
-  current=0;
-  renderList();
-  loadTrackAt(current);
-  play();
+fileInput.addEventListener('change',e=>{
+files=Array.from(e.target.files).filter(f=>f.type.startsWith('audio/'));
+if(!files.length) return;
+order=files.map((_,i)=>i);
+current=0;
+renderList();
+loadTrackAt(current);
+play();
 });
 
-// CARREGA TRACK
 function loadTrackAt(pos){
-  if(!files.length) return;
-  current=pos;
-  const file = files[current];
-  const url = URL.createObjectURL(file);
-  audio.src = url;
-  nowTitle.textContent = file.name.replace(/\.[^/.]+$/,'');
-  nowArtist.textContent='Local';
-  coverImg.style.display='none';
-  audio.load();
-  updateActive();
+if(!files.length) return;
+current=pos;
+const file=files[current];
+audio.src=URL.createObjectURL(file);
+nowTitle.textContent=file.name.replace(/\.[^/.]+$/,'');
+nowArtist.textContent='Local';
+coverImg.style.display='none';
+audio.load();
+updateActive();
 }
 
-// LISTA ATIVA
 function updateActive(){
-  document.querySelectorAll('.track-item').forEach((el,i)=> el.classList.toggle('active',i===current));
+document.querySelectorAll('.track-item').forEach((el,i)=>el.classList.toggle('active',i===current));
 }
 
 function renderList(){
-  listEl.innerHTML='';
-  files.forEach((f,i)=>{
-    const div=document.createElement('div');
-    div.className='track-item'; div.textContent=f.name.replace(/\.[^/.]+$/,'');
-    div.onclick=()=>{ current=i; loadTrackAt(current); play(); };
-    listEl.appendChild(div);
-  });
-  updateActive();
+listEl.innerHTML='';
+files.forEach((f,i)=>{
+const div=document.createElement('div');
+div.className='track-item';
+div.textContent=f.name.replace(/\.[^/.]+$/,'');
+div.onclick=()=>{current=i;loadTrackAt(current);play();}
+listEl.appendChild(div);
+});
+updateActive();
 }
 
-// BARRA DE PROGRESSO
-audio.addEventListener('timeupdate', ()=>{
-  if(!isNaN(audio.duration)){
-    const pct=(audio.currentTime/audio.duration)*100;
-    progress.value=pct;
-    curTime.textContent=Math.floor(audio.currentTime/60)+':'+String(Math.floor(audio.currentTime%60)).padStart(2,'0');
-    durTime.textContent=Math.floor(audio.duration/60)+':'+String(Math.floor(audio.duration%60)).padStart(2,'0');
-  }
+audio.addEventListener('timeupdate',()=>{
+if(!isNaN(audio.duration)){
+progress.value=(audio.currentTime/audio.duration)*100;
+curTime.textContent=Math.floor(audio.currentTime/60)+':'+String(Math.floor(audio.currentTime%60)).padStart(2,'0');
+durTime.textContent=Math.floor(audio.duration/60)+':'+String(Math.floor(audio.duration%60)).padStart(2,'0');
+}
 });
-progress.addEventListener('input', ()=>{ audio.currentTime=(progress.value/100)*audio.duration; });
+progress.addEventListener('input',()=>{audio.currentTime=(progress.value/100)*audio.duration;});
 
-// AVANÇA AO TERMINAR
-audio.addEventListener('ended', ()=>{
-  if(isRepeat){ loadTrackAt(current); play(); return; }
-  if(isShuffle){ current=Math.floor(Math.random()*files.length); } 
-  else{ current=(current+1)%files.length; }
-  loadTrackAt(current); play();
+audio.addEventListener('ended',()=>{
+if(isRepeat){loadTrackAt(current);play();return;}
+if(isShuffle){current=Math.floor(Math.random()*files.length);}
+else{current=(current+1)%files.length;}
+loadTrackAt(current);play();
 });
 
-// OVERLAY PARA INICIAR AUTOPLAY (mobile)
-startOverlay.addEventListener('click', ()=>{
-  startOverlay.style.display='none';
-  if(files.length) play();
+startOverlay.addEventListener('click',()=>{
+startOverlay.style.display='none';
+if(files.length) play();
 });
 </script>
 </body>
