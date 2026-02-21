@@ -247,9 +247,27 @@ nextBtn.addEventListener('click',()=>{ if(isRepeat){ loadTrackAt(current); safeP
 shuffleBtn.addEventListener('click',()=>{ isShuffle=!isShuffle; shuffleBtn.style.background=isShuffle?'rgba(29,185,84,0.14)':'transparent'; order=isShuffle?files.map((_,i)=>i).sort(()=>Math.random()-0.5):files.map((_,i)=>i); loadTrackAt(current); });
 repeatBtn.addEventListener('click',()=>{ isRepeat=!isRepeat; repeatBtn.style.background=isRepeat?'rgba(29,185,84,0.14)':'transparent'; });
 
-// Progress
-audio.addEventListener('timeupdate',()=>{ if(!progress.dragging){ const p=audio.currentTime/audio.duration*100||0; progress.value=p; curTime.textContent=fmt(audio.currentTime); durTime.textContent=fmt(audio.duration); } });
-progress.addEventListener('input',()=>{ audio.currentTime=progress.value/100*audio.duration; });
+audio.addEventListener('ended', () => {
+  if (!files.length) return;   // segurança, sem arquivos nada acontece
+
+  if (isRepeat) {
+    // repete a mesma faixa
+    loadTrackAt(current);
+    play();
+    return;
+  }
+
+  // avança para a próxima faixa
+  if (isShuffle) {
+    // em shuffle, escolhe próximo aleatório
+    current = Math.floor(Math.random() * files.length);
+  } else {
+    current = (current + 1) % files.length;
+  }
+
+  loadTrackAt(current);
+  play();
+});
 
 // Volume
 volumeSlider.addEventListener('input',()=>{ audio.volume=volumeSlider.value; });
