@@ -1,23 +1,20 @@
-const CACHE_NAME = 'douglas-music-v1';
-const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  'https://cdn.jsdelivr.net/npm/jsmediatags@3.9.7/dist/jsmediatags.min.js'
-];
+const CACHE_NAME = 'player-cache-v1';
+const PRECACHE = ['./', 'manifest.json', 'index.html', 'icons/icon-192.png','icons/icon-512.png'];
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE))
+    .then(()=>self.skipWaiting())
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
+self.addEventListener('activate', e => {
+  e.waitUntil(self.clients.claim());
+});
+
+self.addEventListener('fetch', e => {
+  if(e.request.url.startsWith('chrome-extension:')||e.request.url.startsWith('data:')||e.request.url.startsWith('blob:')) return;
+  e.respondWith(
+    caches.match(e.request).then(resp=>resp||fetch(e.request).then(r=>{caches.open(CACHE_NAME).then(c=>c.put(e.request,r.clone())); return r;}))
   );
 });
