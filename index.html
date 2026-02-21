@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Player Douglas Almondes</title>
 
-<!-- Manifest para PWA -->
+<!-- Manifest PWA -->
 <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1db954">
 
-<!-- Service Worker -->
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js')
@@ -17,7 +17,7 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
-<!-- Overlay inicial para autoplay -->
+<!-- Overlay inicial para habilitar autoplay em dispositivos que exigem interação -->
 <div id="startOverlay" style="position:fixed;inset:0;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:9999">
   Clique para iniciar o player
 </div>
@@ -42,7 +42,6 @@ body{
 }
 @media (max-width:980px){ .app{ grid-template-columns:320px 1fr; gap:12px; } }
 @media (max-width:860px){ .app{ grid-template-columns:1fr; } }
-
 .panel{
   background:linear-gradient(180deg,var(--panel),#0f0f0f);
   border-radius:14px; padding:16px; box-shadow:0 8px 30px rgba(0,0,0,0.6);
@@ -115,8 +114,9 @@ body{
 <audio id="audio" crossorigin="anonymous"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.7/dist/jsmediatags.min.js"></script>
+
 <script>
-// Elementos
+// ELEMENTOS
 const audio = document.getElementById('audio');
 const playBtn = document.getElementById('playBtn');
 const nextBtn = document.getElementById('nextBtn');
@@ -134,38 +134,53 @@ const durTime = document.getElementById('durTime');
 const startOverlay = document.getElementById('startOverlay');
 
 let files = [];
+let order = [];
 let current = 0;
 let isPlaying = false;
 let isShuffle = false;
 let isRepeat = false;
 
-// Play / Pause
+// FUNÇÕES DE PLAY/PAUSE
 function play(){ audio.play().then(()=>{ isPlaying=true; playBtn.textContent='⏸️'; }).catch(()=>{}); }
 function pause(){ audio.pause(); isPlaying=false; playBtn.textContent='▶️'; }
+
+// CONTROLES
 playBtn.addEventListener('click', ()=> audio.paused ? play() : pause());
 prevBtn.addEventListener('click', ()=> { current=(current-1+files.length)%files.length; loadTrackAt(current); play(); });
 nextBtn.addEventListener('click', ()=> { current=(current+1)%files.length; loadTrackAt(current); play(); });
 shuffleBtn.addEventListener('click', ()=>{ isShuffle=!isShuffle; shuffleBtn.style.background=isShuffle?'rgba(29,185,84,0.14)':'transparent'; });
 repeatBtn.addEventListener('click', ()=>{ isRepeat=!isRepeat; repeatBtn.style.background=isRepeat?'rgba(29,185,84,0.14)':'transparent'; });
 
-// Overlay clique para autoplay
-startOverlay.addEventListener('click', () => {
-  startOverlay.style.display='none';
-  if(files.length>0){ loadTrackAt(current); play(); } 
-  else{ fileInput.click(); }
-});
-
-// Seleção de pasta
+// SELEÇÃO DE ARQUIVOS
 fileInput.addEventListener('change', e=>{
   files = Array.from(e.target.files).filter(f=>f.type.startsWith('audio/'));
   if(!files.length) return;
+  order = files.map((_,i)=>i);
   current=0;
   renderList();
   loadTrackAt(current);
   play();
 });
 
-// Renderiza lista
+// CARREGA TRACK
+function loadTrackAt(pos){
+  if(!files.length) return;
+  current=pos;
+  const file = files[current];
+  const url = URL.createObjectURL(file);
+  audio.src = url;
+  nowTitle.textContent = file.name.replace(/\.[^/.]+$/,'');
+  nowArtist.textContent='Local';
+  coverImg.style.display='none';
+  audio.load();
+  updateActive();
+}
+
+// LISTA ATIVA
+function updateActive(){
+  document.querySelectorAll('.track-item').forEach((el,i)=> el.classList.toggle('active',i===current));
+}
+
 function renderList(){
   listEl.innerHTML='';
   files.forEach((f,i)=>{
@@ -177,23 +192,7 @@ function renderList(){
   updateActive();
 }
 
-// Atualiza item ativo
-function updateActive(){ document.querySelectorAll('.track-item').forEach((el,i)=> el.classList.toggle('active',i===current)); }
-
-// Carrega faixa
-function loadTrackAt(pos){
-  if(!files.length) return;
-  current=pos;
-  const file = files[current];
-  audio.src = URL.createObjectURL(file);
-  nowTitle.textContent = file.name.replace(/\.[^/.]+$/,'');
-  nowArtist.textContent='Local';
-  coverImg.style.display='none';
-  audio.load();
-  updateActive();
-}
-
-// Progress bar
+// BARRA DE PROGRESSO
 audio.addEventListener('timeupdate', ()=>{
   if(!isNaN(audio.duration)){
     const pct=(audio.currentTime/audio.duration)*100;
@@ -204,14 +203,19 @@ audio.addEventListener('timeupdate', ()=>{
 });
 progress.addEventListener('input', ()=>{ audio.currentTime=(progress.value/100)*audio.duration; });
 
-// Avançar ao terminar
+// AVANÇA AO TERMINAR
 audio.addEventListener('ended', ()=>{
   if(isRepeat){ loadTrackAt(current); play(); return; }
   if(isShuffle){ current=Math.floor(Math.random()*files.length); } 
   else{ current=(current+1)%files.length; }
   loadTrackAt(current); play();
 });
-</script>
 
+// OVERLAY PARA INICIAR AUTOPLAY (mobile)
+startOverlay.addEventListener('click', ()=>{
+  startOverlay.style.display='none';
+  if(files.length) play();
+});
+</script>
 </body>
 </html>
